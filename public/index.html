@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPause</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        glass: { 100: 'rgba(255, 255, 255, 0.1)', 200: 'rgba(255, 255, 255, 0.2)' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* THE AURORA BACKGROUND ANIMATION */
+        body {
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+            background-size: 400% 400%;
+            animation: aurora 15s ease infinite;
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+
+        @keyframes aurora {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* GLASSMORPHISM UTILITIES */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .text-glow { text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex selection:bg-indigo-500 selection:text-white">
+    <div id="app" class="w-full h-full flex"></div>
+    <script src="app.js"></script>
+</body>
+</html>
