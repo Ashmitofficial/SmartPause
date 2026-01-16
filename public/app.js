@@ -7,11 +7,9 @@ const App = {
         else this.render();
     },
 
-    // --- NEW LOGO ENGINE (Local First) ---
+    // LOGO ENGINE 
     getLogo(name) {
         const n = name.toLowerCase();
-        
-        // 1. Map names to your local filenames
         let filename = 'default';
         if (n.includes('netflix')) filename = 'netflix';
         else if (n.includes('adobe')) filename = 'adobe';
@@ -23,13 +21,9 @@ const App = {
         else if (n.includes('tinder')) filename = 'tinder';
         else if (n.includes('spotify')) filename = 'spotify';
         else if (n.includes('hotstar')) filename = 'hotstar';
-
-        // 2. Return path to your local folder
-        // Note: The onerror in the HTML will auto-fallback to Internet API if you haven't downloaded the image yet.
         return `/logos/${filename}.png`;
     },
 
-    // --- FALLBACK LOGO (If local file missing) ---
     getRemoteLogo(name) {
         const n = name.toLowerCase();
         let domain = 'spark.com';
@@ -37,13 +31,74 @@ const App = {
         else if (n.includes('adobe')) domain = 'adobe.com';
         else if (n.includes('cult')) domain = 'cure.fit';
         else if (n.includes('nord')) domain = 'nordvpn.com';
-        else if (n.includes('gpt')) domain = 'openai.com';
+        else if (n.includes('gpt') || n.includes('openai.com')) domain = 'openai.com'; 
         else if (n.includes('google')) domain = 'google.com';
         else if (n.includes('zomato')) domain = 'zomato.com';
         else if (n.includes('tinder')) domain = 'tinder.com';
         else if (n.includes('spotify')) domain = 'spotify.com';
         else if (n.includes('hotstar')) domain = 'hotstar.com';
         return `https://logo.clearbit.com/${domain}`;
+    },
+
+    // TOAST SYSTEM 
+    showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return; 
+        const toast = document.createElement('div');
+        const color = type === 'success' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-indigo-500 bg-indigo-500/10 text-indigo-300';
+        
+        toast.className = `glass-panel px-6 py-4 rounded-xl border-l-4 ${color} shadow-2xl flex items-center gap-4 min-w-[300px] animate-slideIn`;
+        toast.innerHTML = `
+            <div class="p-2 bg-white/5 rounded-lg"><i data-lucide="${type === 'success' ? 'check-circle' : 'zap'}" class="w-5 h-5"></i></div>
+            <div><p class="font-bold text-sm text-white">${type === 'success' ? 'Action Successful' : 'Processing'}</p><p class="text-xs opacity-70">${message}</p></div>
+        `;
+        
+        container.appendChild(toast);
+        lucide.createIcons();
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    },
+
+    // ACTIONS
+    async triggerAction(action, name) {
+        if (action === 'Cancel') {
+            this.showToast(`Connecting to ${name} Merchant API...`, 'process');
+            const res = await fetch('/api/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setTimeout(() => {
+                    this.showToast(`${name} Subscription Terminated.`);
+                    this.navigate('dashboard'); 
+                }, 1500); 
+            }
+        } 
+        else if (action === 'Optimize') {
+            // OPTIMIZE LOGIC
+            this.showToast(`Negotiating Annual Plan for ${name}...`, 'process');
+            
+            const res = await fetch('/api/optimize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                setTimeout(() => {
+                    this.showToast(`Success! ${name} cost reduced by 20%.`);
+                    this.navigate('dashboard'); // Refresh to show new price/green status
+                }, 1500);
+            }
+        }
     },
 
     async login(username, password) {
@@ -76,7 +131,7 @@ const App = {
         if (target === 'analytics') this.initCharts();
     },
 
-    // --- COMPONENTS ---
+    // COMPONENTS 
 
     Sidebar: (active) => `
         <aside class="w-72 glass-panel border-r-0 border-r-white/10 h-full flex flex-col justify-between p-6 shrink-0 relative z-20">
@@ -87,7 +142,7 @@ const App = {
                     </div>
                     <div>
                         <h1 class="font-bold text-xl tracking-wide text-white">SmartPause</h1>
-                        </div>
+                    </div>
                 </div>
                 
                 <nav class="space-y-3">
@@ -100,6 +155,9 @@ const App = {
                     <button onclick="App.navigate('calendar')" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${active === 'calendar' ? 'bg-white/10 text-white shadow-lg border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white'}">
                         <i data-lucide="calendar-days" class="w-5 h-5"></i> <span class="font-medium">Crystal Ball</span>
                     </button>
+                    <button onclick="App.navigate('history')" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${active === 'history' ? 'bg-white/10 text-white shadow-lg border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white'}">
+                        <i data-lucide="scroll-text" class="w-5 h-5"></i> <span class="font-medium">Ledger</span>
+                    </button>
                 </nav>
             </div>
             
@@ -109,6 +167,41 @@ const App = {
                 <button onclick="App.logout()" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="log-out" class="w-4 h-4"></i></button>
             </div>
         </aside>
+    `,
+
+    // NEW: HISTORY VIEW
+    HistoryView: (data) => `
+        ${App.Sidebar('history')}
+        <main class="flex-1 h-full overflow-y-auto p-10 relative">
+             <header class="mb-10"><h2 class="text-4xl font-bold text-white mb-2 text-glow">Ledger</h2><p class="text-indigo-200/70">Full transaction history.</p></header>
+             <div class="glass-card rounded-2xl overflow-hidden border border-white/10">
+                <table class="w-full text-left text-white">
+                    <thead class="bg-white/5 text-indigo-300 uppercase text-xs font-bold border-b border-white/10">
+                        <tr>
+                            <th class="p-4">Date</th>
+                            <th class="p-4">Merchant</th>
+                            <th class="p-4">Category</th>
+                            <th class="p-4 text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        ${data.map(t => `
+                            <tr class="hover:bg-white/5 transition-colors group">
+                                <td class="p-4 text-white/70 font-mono text-sm">${t.date}</td>
+                                <td class="p-4 flex items-center gap-3 font-bold">
+                                    <div class="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm">
+                                        <img src="${App.getLogo(t.name)}" class="w-full h-full object-contain" onerror="this.src='${App.getRemoteLogo(t.name)}'">
+                                    </div>
+                                    ${t.name}
+                                </td>
+                                <td class="p-4 text-xs uppercase tracking-wider opacity-60">${t.category}</td>
+                                <td class="p-4 text-right font-mono font-bold group-hover:text-emerald-300 transition-colors">₹${t.amount}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+             </div>
+        </main>
     `,
 
     DashboardView: (data) => {
@@ -141,13 +234,24 @@ const App = {
                                 </div>
                             </div>
                             
-                            <div class="bg-white/5 border border-white/10 px-6 py-4 rounded-2xl text-right">
-                                <p class="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Recommendation</p>
-                                <div class="flex items-center justify-end gap-2 text-white font-bold text-lg">
-                                    <i data-lucide="info" class="w-4 h-4 text-indigo-400"></i>
-                                    ${sub.intentScore < 50 ? 'Cancel Immediately' : 'Maintain & Optimize'}
-                                </div>
-                            </div>
+                            ${sub.intentScore > 90 ? 
+                                `<div class="bg-white/5 border border-white/10 px-6 py-4 rounded-2xl text-right opacity-50 cursor-not-allowed">
+                                    <p class="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Status</p>
+                                    <div class="flex items-center justify-end gap-2 text-white font-bold text-lg">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+                                        <span class="text-emerald-100">Optimized</span>
+                                    </div>
+                                </div>` 
+                                : 
+                                `<button onclick="App.triggerAction('${sub.intentScore < 50 ? 'Cancel' : 'Optimize'}', '${sub.name}')" 
+                                        class="bg-white/5 border border-white/10 px-6 py-4 rounded-2xl text-right hover:bg-white/10 hover:border-white/30 transition-all cursor-pointer w-full md:w-auto text-left md:text-right">
+                                    <p class="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1">Recommendation</p>
+                                    <div class="flex items-center justify-end gap-2 text-white font-bold text-lg">
+                                        <i data-lucide="${sub.intentScore < 50 ? 'trash-2' : 'sliders'}" class="w-4 h-4 ${sub.intentScore < 50 ? 'text-rose-400' : 'text-emerald-400'}"></i>
+                                        <span class="${sub.intentScore < 50 ? 'text-rose-100' : 'text-emerald-100'}">${sub.intentScore < 50 ? 'Cancel Immediately' : 'Maintain & Optimize'}</span>
+                                    </div>
+                                </button>`
+                            }
                         </div>
 
                         <div class="mb-8">
@@ -236,6 +340,7 @@ const App = {
         else if (this.view === 'dashboard') root.innerHTML = this.DashboardView(this.data);
         else if (this.view === 'analytics') root.innerHTML = this.AnalyticsView();
         else if (this.view === 'calendar') root.innerHTML = this.CalendarView(this.data);
+        else if (this.view === 'history') root.innerHTML = this.HistoryView(this.data); // Render new history view
         lucide.createIcons();
     },
 

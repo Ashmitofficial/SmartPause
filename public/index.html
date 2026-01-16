@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPause</title>
+    <title>SmartPause | Enterprise Dashboard</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -22,7 +22,7 @@
         }
     </script>
     <style>
-        /* THE AURORA BACKGROUND ANIMATION */
+        /* BG ANIMATION */
         body {
             background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
             background-size: 400% 400%;
@@ -61,10 +61,20 @@
         }
 
         .text-glow { text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+
+        /* Animation for Toast */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-slideIn { animation: slideIn 0.3s ease forwards; }
     </style>
 </head>
 <body class="h-screen overflow-hidden flex selection:bg-indigo-500 selection:text-white">
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-4"></div>
+
     <div id="app" class="w-full h-full flex"></div>
+    
     <script src="app.js"></script>
 </body>
 </html>
