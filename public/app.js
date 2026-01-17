@@ -7,7 +7,7 @@ const App = {
         else this.render();
     },
 
-    // LOGO ENGINE 
+    // LOGO ENGINE (Merchant Logos)
     getLogo(name) {
         const n = name.toLowerCase();
         let filename = 'default';
@@ -81,21 +81,17 @@ const App = {
             }
         } 
         else if (action === 'Optimize') {
-            // OPTIMIZE LOGIC
             this.showToast(`Negotiating Annual Plan for ${name}...`, 'process');
-            
             const res = await fetch('/api/optimize', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name })
             });
-            
             const data = await res.json();
-            
             if (data.success) {
                 setTimeout(() => {
                     this.showToast(`Success! ${name} cost reduced by 20%.`);
-                    this.navigate('dashboard'); // Refresh to show new price/green status
+                    this.navigate('dashboard'); 
                 }, 1500);
             }
         }
@@ -132,14 +128,11 @@ const App = {
     },
 
     // COMPONENTS 
-
     Sidebar: (active) => `
         <aside class="w-72 glass-panel border-r-0 border-r-white/10 h-full flex flex-col justify-between p-6 shrink-0 relative z-20">
             <div>
                 <div class="flex items-center gap-4 mb-12 px-2">
-                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg shadow-[0_0_15px_rgba(99,102,241,0.5)] flex items-center justify-center">
-                        <i data-lucide="zap" class="text-white w-6 h-6 fill-white"></i>
-                    </div>
+                    <svg class="w-10 h-10 shadow-[0_0_15px_rgba(99,102,241,0.5)] rounded-xl"><use href="#icon-smartpause"/></svg>
                     <div>
                         <h1 class="font-bold text-xl tracking-wide text-white">SmartPause</h1>
                     </div>
@@ -169,7 +162,6 @@ const App = {
         </aside>
     `,
 
-    // NEW: HISTORY VIEW
     HistoryView: (data) => `
         ${App.Sidebar('history')}
         <main class="flex-1 h-full overflow-y-auto p-10 relative">
@@ -212,7 +204,15 @@ const App = {
         <main class="flex-1 h-full overflow-y-auto p-10 relative">
             <header class="flex justify-between items-end mb-10 relative z-10">
                 <div><h2 class="text-4xl font-bold text-white mb-2 text-glow">Overview</h2><p class="text-indigo-200/70">Your Financial Clarity.</p></div>
-                ${totalSavings > 0 ? `<div class="glass-panel px-6 py-3 rounded-2xl flex items-center gap-3 border-emerald-500/30 bg-emerald-500/10"><div class="p-2 bg-emerald-500 rounded-lg shadow-lg shadow-emerald-500/40"><i data-lucide="sparkles" class="w-4 h-4 text-white"></i></div><div><p class="text-[10px] uppercase font-bold text-emerald-300 tracking-wider">Potential Savings</p><p class="text-xl font-bold text-white">₹${totalSavings.toLocaleString()}</p></div></div>` : ''}
+                
+                ${totalSavings > 0 ? `
+                    <div class="glass-panel px-6 py-3 rounded-2xl flex items-center gap-3 border-emerald-500/30 bg-emerald-500/10">
+                        <svg class="w-10 h-10 shadow-lg shadow-emerald-500/20"><use href="#icon-savings"/></svg>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-emerald-300 tracking-wider">Potential Savings</p>
+                            <p class="text-xl font-bold text-white">₹${totalSavings.toLocaleString()}</p>
+                        </div>
+                    </div>` : ''}
             </header>
 
             <div class="space-y-6 relative z-10">
@@ -332,7 +332,27 @@ const App = {
         </main>
     `,
 
-    LoginView: () => `<div class="w-full h-full flex items-center justify-center p-4 relative"><div class="glass-panel w-full max-w-md p-10 rounded-3xl relative z-10 border border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.3)]"><div class="text-center mb-10"><div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.6)]"><i data-lucide="zap" class="w-8 h-8 text-white fill-white"></i></div><h2 class="text-3xl font-bold text-white mb-2 text-glow">Welcome Back</h2><p class="text-indigo-200/80">Access your financial command center</p></div><form onsubmit="event.preventDefault(); App.login(this.username.value, this.password.value)" class="space-y-5"><div class="space-y-1"><label class="text-xs font-bold text-indigo-300 uppercase ml-1">Username</label><input name="username" type="text" placeholder="admin" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:bg-black/40 transition-all"></div><div class="space-y-1"><label class="text-xs font-bold text-indigo-300 uppercase ml-1">Password</label><input name="password" type="password" placeholder="123" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:bg-black/40 transition-all"></div><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/30 transition-all transform hover:scale-[1.02] mt-4">Enter Dashboard</button></form></div></div>`,
+    LoginView: () => `
+        <div class="w-full h-full flex items-center justify-center p-4 relative">
+            <div class="glass-panel w-full max-w-md p-10 rounded-3xl relative z-10 border border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
+                <div class="text-center mb-10">
+                    <svg class="w-16 h-16 mx-auto mb-6 shadow-[0_0_20px_rgba(99,102,241,0.6)] rounded-2xl"><use href="#icon-smartpause"/></svg>
+                    <h2 class="text-3xl font-bold text-white mb-2 text-glow">Welcome Back</h2>
+                    <p class="text-indigo-200/80">Access your financial command center</p>
+                </div>
+                <form onsubmit="event.preventDefault(); App.login(this.username.value, this.password.value)" class="space-y-5">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-indigo-300 uppercase ml-1">Username</label>
+                        <input name="username" type="text" placeholder="admin" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:bg-black/40 transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-indigo-300 uppercase ml-1">Password</label>
+                        <input name="password" type="password" placeholder="123" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 focus:bg-black/40 transition-all">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/30 transition-all transform hover:scale-[1.02] mt-4">Enter Dashboard</button>
+                </form>
+            </div>
+        </div>`,
 
     render() {
         const root = document.getElementById('app');
@@ -340,7 +360,7 @@ const App = {
         else if (this.view === 'dashboard') root.innerHTML = this.DashboardView(this.data);
         else if (this.view === 'analytics') root.innerHTML = this.AnalyticsView();
         else if (this.view === 'calendar') root.innerHTML = this.CalendarView(this.data);
-        else if (this.view === 'history') root.innerHTML = this.HistoryView(this.data); // Render new history view
+        else if (this.view === 'history') root.innerHTML = this.HistoryView(this.data);
         lucide.createIcons();
     },
 
@@ -348,7 +368,6 @@ const App = {
         Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
         Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
 
-        // Standard Doughnut Chart (Clean Ring)
         new Chart(document.getElementById('categoryChart'), {
             type: 'doughnut',
             data: {
